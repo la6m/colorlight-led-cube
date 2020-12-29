@@ -2,8 +2,9 @@ SOURCE :=../liteeth_core.v \
          ../udp_panel_writer.v \
          ../ledpanel.v \
          ../pll.v \
-         ../phy_io.v \
          ../top.v
+
+#         ../phy_io.v \
 
 YOSYS_SCRIPT:=syn.ys
 
@@ -30,6 +31,13 @@ top.svf : top.bit
 flash.svf : top.bit
 	./bit_to_flash.py top.bit flash.svf
 
+.PHONY : load prog clean
 
-prog : top.svf
+load: top.bit
+	openFPGALoader -c ft2232 top.bit
+
+prog: top.svf
 	~/opt/openocd/bin/openocd -f openocd.cfg -c "transport select jtag; init; scan_chain; svf top.svf; shutdown; quit"
+
+clean:
+	rm -f ../pll.v top.json top.config top.svf flash.svf

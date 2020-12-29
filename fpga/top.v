@@ -36,15 +36,18 @@ module top
     output wire E, // for 1/32 scan
     output wire LAT,
     output wire OE, //blank
-    output wire CLK
+    output wire CLK,
 
+    output wire CLK_IN,
+    output wire CLK_25,
+    output wire CLK_PANEL
 );
 
     //------------------------------------------------------------------
     // PLL Instantiation and Locked Reset generation
     //------------------------------------------------------------------
 
-    wire phy_init_done;
+//    wire phy_init_done;
     wire                 locked;
     wire                 clock;
     reg [3:0]            locked_reset = 4'b1111;
@@ -52,6 +55,11 @@ module top
     wire                 display_clock;
 
     pll pll_inst(.clkin(osc25m),.clock(clock),.panel_clock(display_clock),.locked(locked));
+
+assign CLK_IN = osc25m;
+assign CLK_25 = clock;
+assign CLK_PANEL = display_clock;
+
 
     always @(posedge clock or negedge locked) begin
         if (locked == 1'b0) begin
@@ -80,16 +88,16 @@ module top
     wire  [31:0]  udp_source_data      ;
     wire  [3:0]   udp_source_error     ;
 
-    phy_sequencer phy_sequencer_inst (.clock(clock),
-                  .reset(reset),
-                  .phy_resetn(phy_resetn),
-                  .mdio_scl(mdio_scl),
-                  .mdio_sda(mdio_sda),
-                  .phy_init_done(phy_init_done));
+//    phy_sequencer phy_sequencer_inst (.clock(clock),
+//                  .reset(reset),
+//                  .phy_resetn(phy_resetn),
+//                  .mdio_scl(mdio_scl),
+//                  .mdio_sda(mdio_sda),
+//                  .phy_init_done(phy_init_done));
 
     liteeth_core eternit (
         /* input         */ .sys_clock            (clock                ),
-        /* input         */ .sys_reset            (reset & ~phy_init_done),
+        /* input         */ .sys_reset            (reset /*& ~phy_init_done*/),
         /* output        */ .rgmii_eth_clocks_tx  (rgmii_tx_clk         ),
         /* input         */ .rgmii_eth_clocks_rx  (rgmii_rx_clk         ),
         /* output        */ .rgmii_eth_rst_n      (                     ),
